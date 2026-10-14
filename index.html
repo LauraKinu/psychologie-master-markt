@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Psychologie-Master Wettbewerb</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, filter bar → KPI strip → two charts side by side → size list → full table → methods */
+:root{
+  --bg:#f7f8f8; --surface:#ffffff; --ink:#14181b; --ink-2:#4b5258; --ink-3:#7a8188;
+  --line:#e2e5e7; --grid:#eceef0; --chip:#eef1f3;
+  --praesenz:#2a78d6; --fern:#eb6834; --warn:#9a6a00; --warn-bg:#fff4d6;
+  --font-ui:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121516; --surface:#1a1e20; --ink:#eef0f1; --ink-2:#b7bdc2; --ink-3:#8a9298;
+  --line:#2c3236; --grid:#252a2d; --chip:#252b2e;
+  --praesenz:#3987e5; --fern:#d95926; --warn:#f0c35a; --warn-bg:#3a2f12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121516; --surface:#1a1e20; --ink:#eef0f1; --ink-2:#b7bdc2; --ink-3:#8a9298;
+  --line:#2c3236; --grid:#252a2d; --chip:#252b2e;
+  --praesenz:#3987e5; --fern:#d95926; --warn:#f0c35a; --warn-bg:#3a2f12; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+header h1{font-size:clamp(1.5rem,3vw,2.05rem);line-height:1.15;margin:0 0 6px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--ink-2);max-width:72ch}
+.meta{font-family:var(--font-num);font-size:12px;color:var(--ink-3);margin-top:8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;min-width:0}
+.panel h2{font-size:1rem;margin:0 0 2px;font-weight:600}
+.panel .sub{color:var(--ink-3);font-size:13px;margin:0 0 14px}
+.filters{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:flex-end}
+.fgroup{display:grid;gap:6px}
+.flabel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.seg{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--chip)}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink-2);padding:7px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+.seg button:focus-visible,.chk input:focus-visible,#q:focus-visible,th button:focus-visible{outline:2px solid var(--praesenz);outline-offset:2px}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink-2);padding-bottom:6px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi .v{font-family:var(--font-num);font-size:1.75rem;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .l{font-size:13px;color:var(--ink-2);margin-top:4px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin:-4px 0 12px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.bars{display:grid;gap:9px}
+.brow{display:grid;grid-template-columns:minmax(120px,38%) minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:13.5px}
+.brow .lab{color:var(--ink);line-height:1.25}
+.track{height:20px;display:flex;gap:2px;background:linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/25% 100%;border-left:1px solid var(--line)}
+.seg-bar{height:100%;min-width:0;cursor:default;transition:opacity .15s}
+.seg-bar:last-child{border-radius:0 4px 4px 0}
+.seg-bar:hover{opacity:.82}
+.brow .n{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-2)}
+.empty{color:var(--ink-3);font-size:13.5px;padding:8px 0}
+.size-list{display:grid;gap:7px;max-height:540px;overflow:auto;padding-right:4px}
+.srow{display:grid;grid-template-columns:minmax(150px,34%) minmax(0,1fr) 70px 54px;gap:10px;align-items:center;font-size:13px}
+.srow .nm{line-height:1.25}
+.strack{height:12px;background:var(--grid);border-radius:0 3px 3px 0;overflow:hidden}
+.sfill{height:100%;border-radius:0 3px 3px 0}
+.srow .st,.srow .pc{font-family:var(--font-num);font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-2)}
+.shead{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--ink-2);white-space:nowrap}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.tag.t-p{box-shadow:inset 3px 0 0 var(--praesenz)}
+.tag.t-f{box-shadow:inset 3px 0 0 var(--fern)}
+.tablebar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:10px}
+#q{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0;width:min(320px,100%)}
+.tscroll{overflow-x:auto;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{position:sticky;top:0;background:var(--surface);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+th button{all:unset;cursor:pointer}
+td.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+td a{color:var(--praesenz)}
+.methods{font-size:13.5px;color:var(--ink-2);display:grid;gap:8px}
+.methods p{margin:0;max-width:95ch}
+.methods strong{color:var(--ink)}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:6px 9px;border-radius:6px;max-width:300px;z-index:9;line-height:1.35}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Psychologie-Master an privaten Hochschulen in Deutschland</h1>
+    <p>Wettbewerber-Mapping für die Profilentscheidung des INU-Masters Psychologie. Jede Zeile ist ein Studiengang, mit Link zur Studiengangsseite. Die Hochschulgröße bezieht sich auf die gesamte Hochschule.</p>
+    <div class="meta">Recherche: 14.10.2026 · Studierendenzahlen: WS 2024/25 (Hochschulkompass/Destatis)</div>
+  </header>
+
+  <section class="panel" aria-label="Filter">
+    <div class="filters">
+      <div class="fgroup"><span class="flabel" id="lt">Hochschultyp</span>
+        <div class="seg" role="group" aria-labelledby="lt" id="f-typ">
+          <button id="typ-all" data-v="all" aria-pressed="true">Alle privaten</button>
+          <button id="typ-p" data-v="P" aria-pressed="false">Präsenz &amp; hybrid</button>
+          <button id="typ-f" data-v="F" aria-pressed="false">Fernstudium</button>
+        </div></div>
+      <div class="fgroup"><span class="flabel" id="lg">Hochschulgröße (Studierende gesamt)</span>
+        <div class="seg" role="group" aria-labelledby="lg" id="f-size">
+          <button id="sz-all" data-v="all" aria-pressed="true">Alle</button>
+          <button id="sz-s" data-v="klein" aria-pressed="false">klein &lt; 2.000</button>
+          <button id="sz-m" data-v="mittel" aria-pressed="false">mittel 2.000–10.000</button>
+          <button id="sz-l" data-v="groß" aria-pressed="false">groß &gt; 10.000</button>
+        </div></div>
+      <label class="chk"><input type="checkbox" id="f-sure"> nur gesicherte Angaben (ohne geplante, in Akkreditierung, Portaldaten)</label>
+    </div>
+  </section>
+
+  <section class="kpis" aria-label="Kennzahlen">
+    <div class="kpi"><div class="v" id="k1">–</div><div class="l">Studiengänge</div></div>
+    <div class="kpi"><div class="v" id="k2">–</div><div class="l">Hochschulen</div></div>
+    <div class="kpi"><div class="v" id="k3">–</div><div class="l">mit Quereinstieg ohne Psychologie-Bachelor</div></div>
+    <div class="kpi"><div class="v" id="k4">–</div><div class="l">mit Digital- oder KI-Bezug im Titel oder Schwerpunkt</div></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <h2>Welche Ausrichtung wird am häufigsten angeboten?</h2>
+      <p class="sub">Anzahl Studiengänge je Ausrichtung, eine Ausrichtung pro Studiengang</p>
+      <div class="legend" id="leg1"></div>
+      <div class="bars" id="c-ausr"></div>
+    </section>
+    <section class="panel">
+      <h2>Wer darf rein?</h2>
+      <p class="sub">Zugangsvoraussetzung laut Studiengangsseite</p>
+      <div class="legend" id="leg2"></div>
+      <div class="bars" id="c-zug"></div>
+      <h2 style="margin-top:22px">Approbationsrelevant (PsychThG 2020)</h2>
+      <p class="sub">Master Klinische Psychologie und Psychotherapie mit Zugang zur Approbationsprüfung</p>
+      <div class="bars" id="c-app"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Anbieter nach Größe</h2>
+    <p class="sub">Studierende gesamt (Balken, logarithmisch) und Zahl der Psychologie-Master im aktuellen Filter</p>
+    <div class="srow" style="margin-bottom:6px"><span class="shead">Hochschule</span><span class="shead">Größe</span><span class="shead" style="text-align:right">Studierende</span><span class="shead" style="text-align:right">Master</span></div>
+    <div class="size-list" id="c-size"></div>
+  </section>
+
+  <section class="panel">
+    <div class="tablebar"><div><h2>Alle Studiengänge</h2><p class="sub" style="margin:0" id="tcount"></p></div>
+      <input id="q" type="search" placeholder="Suchen: Hochschule, Studiengang, Schwerpunkt" aria-label="Tabelle durchsuchen"></div>
+    <div class="tscroll"><table>
+      <thead><tr>
+        <th><button data-k="hs">Hochschule</button></th><th><button data-k="typ">Typ</button></th><th><button data-k="name">Studiengang</button></th>
+        <th><button data-k="ausr">Ausrichtung</button></th><th>Schwerpunkte</th><th><button data-k="zug">Zugang</button></th>
+        <th>Kosten (laut Seite)</th><th>Status</th><th>Quelle</th></tr></thead>
+      <tbody id="tb"></tbody></table></div>
+  </section>
+
+  <section class="panel methods">
+    <h2>Methode und Grenzen</h2>
+    <p><strong>Grundgesamtheit:</strong> Master mit Psychologie-Bezug an privaten, staatlich anerkannten Hochschulen in Deutschland. Staatliche und kirchliche Hochschulen sowie MBA und Zertifikate sind nicht enthalten. Ausgangspunkt war der Hochschulkompass der HRK (Filter: weiterführend, privat, Psychologie). Jede Angabe wurde auf der Studiengangsseite geprüft.</p>
+    <p><strong>Typ:</strong> „Fernstudium“ umfasst Fernhochschulen und reine Fern- oder Online-Programme privater Hochschulen. „Präsenz &amp; hybrid“ umfasst Campus-, Blended- und live-online-Formate mit festen Vorlesungszeiten (z. B. FOM, FHM). Hochschule Fresenius und PFH Göttingen erscheinen in beiden Typen.</p>
+    <p><strong>Ausrichtung:</strong> Jeder Studiengang ist genau einer von acht Kategorien zugeordnet, und zwar nach Titel und Kernprofil. Programme mit vielen gleichrangigen Wahlschwerpunkten zählen als „generalistisch“. Der Digital-/KI-Bezug wird separat erfasst und ist keine eigene Kategorie.</p>
+    <p><strong>Größe:</strong> Die Studierendenzahl der gesamten Hochschule (WS 2024/25) stammt aus der Hochschulliste des Hochschulkompass oder ersatzweise von den Statistischen Landesämtern. Landesamtswerte (DIPLOMA, Charlotte Fresenius, HAM) umfassen nur ein Bundesland und sind daher eher zu niedrig. Witten/Herdecke ist eine gerundete Eigenangabe. Für Macromedia liegt keine Gesamtzahl vor.</p>
+    <p><strong>Unsicher, nicht enthalten:</strong> SFU Berlin (deutsche Anerkennung unklar), HIU, ISM, Steinbeis, DIU. Die Euro-FH-Website war nicht abrufbar. Deren Zeilen beruhen auf Portalen und gelten als ungesichert.</p>
+  </section>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+// ---- Data -------------------------------------------------------------------
+// Hochschulen: Studierende gesamt WS 2024/25 (null = keine Zahl)
+const HS={
+ "IU Internationale Hochschule":[125250,"Hochschulkompass"],
+ "SRH Fernhochschule":[9282,"Hochschulkompass"],
+ "HFH Hamburger Fern-Hochschule":[14265,"Hochschulkompass"],
+ "PFH Göttingen":[4315,"Hochschulkompass"],
+ "APOLLON Hochschule":[4409,"Hochschulkompass"],
+ "DIPLOMA Hochschule":[6538,"Landesamt Hessen (nur Hessen)"],
+ "Hochschule Fresenius":[15502,"Hochschulkompass"],
+ "IST-Hochschule":[4797,"Hochschulkompass"],
+ "Tomorrow University":[272,"Hochschulkompass"],
+ "Euro-FH":[10610,"Hochschulkompass"],
+ "MSH Medical School Hamburg":[5512,"Hochschulkompass"],
+ "MSB Medical School Berlin":[3120,"Hochschulkompass"],
+ "HMU Potsdam":[1271,"Amt für Statistik BB"],
+ "HMU Erfurt":[1850,"Hochschulkompass"],
+ "Psychologische Hochschule Berlin":[742,"Hochschulkompass"],
+ "IPU Berlin":[749,"Hochschulkompass"],
+ "Universität Witten/Herdecke":[3500,"Eigenangabe, gerundet"],
+ "Charlotte Fresenius Hochschule":[629,"Landesamt Hessen (nur Wiesbaden)"],
+ "SRH University":[9490,"Hochschulkompass"],
+ "HSD Hochschule Döpfer":[1546,"Hochschulkompass"],
+ "FOM Hochschule":[45369,"Hochschulkompass"],
+ "FHM Fachhochschule des Mittelstands":[5483,"Hochschulkompass"],
+ "DHGS":[2224,"Hochschulkompass"],
+ "BSP Business & Law School":[1939,"Hochschulkompass"],
+ "MU Media University":[1809,"Hochschulkompass"],
+ "Macromedia University":[null,"keine Gesamtzahl"],
+ "CBS University":[4454,"Hochschulkompass"],
+ "University of Europe (UE)":[6352,"Hochschulkompass"],
+ "Rheinische Hochschule Köln":[5677,"Hochschulkompass"],
+ "HdWM Mannheim":[226,"Landesamt BW"],
+ "Hochschule für angewandtes Management":[3912,"Landesamt Bayern (nur Bayern)"],
+ "NORDAKADEMIE":[2506,"Hochschulkompass"],
+ "Zeppelin Universität":[506,"Hochschulkompass"],
+ "Medizinische Hochschule Brandenburg":[966,"Amt für Statistik BB"]
+};
+const AUSR=[
+ "Klinische Psychologie & Psychotherapie (approbationsrelevant)",
+ "Klinische & Gesundheitspsychologie (ohne Approbation)",
+ "Wirtschafts-, A&O- & Personalpsychologie",
+ "Psychologie generalistisch / Wahlschwerpunkte",
+ "Rechtspsychologie",
+ "Beratung & Coaching",
+ "Sportpsychologie",
+ "Weitere Spezialisierungen"
+];
+// A..H → AUSR index; zug: P = Psychologie-Bachelor/-Vorkenntnisse, Q = Quereinstieg möglich, U = unklar
+// status: "" gesichert | "geplant" | "Akkreditierung" | "Portal"
+// [hs, typ, name, abschluss, ausr, schwerpunkte, zug, ki, kosten, status, url]
+const R=[
+ // ---- Fernstudium
+ ["IU Internationale Hochschule","F","Angewandte Psychologie und Beratung","M.Sc.","F","Klinische Psychologie, Wirtschaftspsychologie, Beratung","U",0,"Raten 286–473 €/Monat","","https://www.iu-fernstudium.de/master/angewandte-psychologie-und-beratung/"],
+ ["IU Internationale Hochschule","F","Wirtschaftspsychologie","M.Sc.","C","Innovationsmanagement, KI-Transformation, Organisationsentwicklung, HR","Q",1,"Raten 286–676 €/Monat","","https://www.iu-fernstudium.de/master/wirtschaftspsychologie/"],
+ ["SRH Fernhochschule","F","Psychologie","M.Sc.","D","3 aus 10 Vertiefungen (u. a. Klinische, AO, Digitale, Rechtspsychologie)","P",0,"24 × 566,50 € oder 36 × 407,33 €","","https://www.mobile-university.de/master-fernstudium/psychologie/"],
+ ["SRH Fernhochschule","F","Psychologie mit Schwerpunkt Schulpsychologie","M.Sc.","H","Schulpsychologie","P",0,"24 × 566,50 € oder 36 × 407,33 €","geplant","https://www.mobile-university.de/master-fernstudium/schulpsychologie/"],
+ ["SRH Fernhochschule","F","Angewandte Psychologie mit Schwerpunkt …","M.Sc.","D","Klinische Psych. & Beratung, Geronto, Sport, Kinder/Jugend, Gesundheit, Sozial","Q",0,"Raten 407–704 €/Monat","","https://www.mobile-university.de/master-fernstudium/angewandte-psychologie-klinische-psychologie-und-beratung/"],
+ ["SRH Fernhochschule","F","Wirtschaftspsychologie & Leadership","M.Sc.","C","Beratung & OE, Personal, Arbeit & Gesundheit, Markt/Werbung, Digitalisierung","Q",1,"Raten 407–704 €/Monat","","https://www.mobile-university.de/master-fernstudium/wirtschaftspsychologie-leadership-msc/"],
+ ["SRH Fernhochschule","F","Wirtschaftspsychologie & Künstliche Intelligenz","M.Sc.","C","KI in HRM, KI in Führung, Robotics Psychology & Human Factors","Q",1,"Raten 407–704 €/Monat","","https://www.mobile-university.de/master-fernstudium/wirtschaftspsychologie-kuenstliche-intelligenz/"],
+ ["SRH Fernhochschule","F","Personalpsychologie & Human Resource Management","M.A.","C","–","Q",0,"Raten 407–704 €/Monat","","https://www.mobile-university.de/master-fernstudium/personalpsychologie-human-resource-management-ma/"],
+ ["SRH Fernhochschule","F","Umweltpsychologie und Nachhaltigkeit","M.Sc.","H","Umweltpsychologie","Q",0,"Raten 407–704 €/Monat","geplant","https://www.mobile-university.de/master-fernstudium/umweltpsychologie-und-nachhaltigkeit/"],
+ ["SRH Fernhochschule","F","Digitale Psychologie und Künstliche Intelligenz","M.Sc.","H","KI-Anwendungen, Machine Learning, E-Health","Q",1,"Raten 407–704 €/Monat","geplant","https://www.mobile-university.de/master-fernstudium/digitale-psychologie-und-ki/"],
+ ["HFH Hamburger Fern-Hochschule","F","Psychologie","M.Sc.","D","Gesundheit oder Arbeit & Bildung","P",0,"10.560–13.680 €","","https://www.hfh-fernstudium.de/master-psychologie"],
+ ["HFH Hamburger Fern-Hochschule","F","Wirtschaftspsychologie","M.Sc.","C","Führung, Nachhaltigkeit/Interkulturell, Organisation, Personal","Q",0,"10.560–13.680 €","","https://www.hfh-fernstudium.de/master-wirtschaftspsychologie"],
+ ["PFH Göttingen","F","Psychologie (Fernstudium)","M.Sc.","D","Personal, Gesundheitsförderung, Beratung & Coaching, Klinische Kinder/Jugend","P",0,"ca. 13.000–14.000 € + 650 €","","https://www.pfh.de/fernstudium/master/psychologie"],
+ ["PFH Göttingen","F","Wirtschaftspsychologie","M.A.","C","BGM, Führung, Personal, Marketing/Vertrieb","P",0,"k.A. + 650 €","","https://www.pfh.de/fernstudium/master/wirtschaftspsychologie"],
+ ["PFH Göttingen","F","Angewandte Psychologie für die Wirtschaft","M.A.","C","BGM, Führung, Personalentwicklung","Q",0,"k.A. + 650 €","","https://www.pfh.de/fernstudium/master/angewandte-psychologie"],
+ ["PFH Göttingen","F","Vertriebspsychologie","M.A.","C","B2C/B2B","Q",0,"k.A. + 650 €","","https://www.pfh.de/fernstudium/master/vertriebspsychologie"],
+ ["APOLLON Hochschule","F","Psychologie mit Schwerpunkt Beratungspsychologie","M.Sc.","F","2 aus 6 (u. a. Klinische, Schul-, Rechts-, Personalpsychologie)","P",0,"ab 294 €/Monat","","https://www.apollon-hochschule.de/fernstudium/master/master-psychologie/"],
+ ["APOLLON Hochschule","F","Psychologie mit Schwerpunkt Resilienz und Gesundheitspsychologie","M.Sc.","B","Resilienz, Gesundheit, Stress/Emotionsregulation","P",0,"ab 294 €/Monat","","https://www.apollon-hochschule.de/fernstudium/master/master-psychologie-resilienz-und-gesundheitspsychologie/"],
+ ["DIPLOMA Hochschule","F","Klinische Psychologie & Psychologisches Empowerment","M.Sc.","B","Neuropsychologie, Prävention, Reha","Q",0,"279–511 €/Monat + 985 €","","https://www.diploma.de/master/psychologie/fernstudium"],
+ ["DIPLOMA Hochschule","F","Familienpsychologie","M.Sc.","H","Diversität, eHealth, Global Mental Health, Positive Psychologie","P",1,"279–511 €/Monat + 985 €","","https://www.diploma.de/master/familienpsychologie/fernstudium"],
+ ["DIPLOMA Hochschule","F","Schulpsychologie und Pädagogische Psychologie","M.Sc.","H","Schul- & Pädagogische Psychologie","P",0,"279–511 €/Monat + 985 €","","https://www.diploma.de/master/schulpsychologie/fernstudium"],
+ ["DIPLOMA Hochschule","F","Psychologie mit Schwerpunkt Public Mental Health","M.Sc.","B","Public Mental Health","P",0,"279–511 €/Monat + 985 €","","https://www.diploma.de/master/psychologie-public-mental-health/fernstudium"],
+ ["DIPLOMA Hochschule","F","Wirtschaftspsychologie mit Schwerpunkt Digitalisierung","M.Sc.","C","Coaching digital, digitales BGM, digitales Marketing","Q",1,"207–327 €/Monat + 985 €","","https://www.diploma.de/master/wirtschaftspsychologie/fernstudium"],
+ ["Hochschule Fresenius","F","Wirtschaftspsychologie (onlineplus)","M.Sc.","C","Change, Personal, Führung im digitalen Zeitalter, Konsumentenpsychologie","Q",1,"329–549 €/Monat","","https://www.fernstudium-fresenius.de/master/wirtschaftspsychologie/"],
+ ["Hochschule Fresenius","F","Angewandte Psychologie für Führungskräfte (onlineplus)","M.A.","C","Führung, Change, Personal, Decision Making","Q",0,"329–549 €/Monat","","https://www.fernstudium-fresenius.de/master/angewandte-psychologie/"],
+ ["IST-Hochschule","F","Sportpsychologie","M.Sc.","G","Diagnostik, Intervention, Teamentwicklung, Coaching","Q",0,"11.880 € (VZ) / 13.320 € (TZ)","","https://www.ist-hochschule.de/master-sportpsychologie"],
+ ["Tomorrow University","F","Impact Master of Arts in Applied Psychology","M.A.","C","Coaching, Org. Psychology & New Work, Human-Centered AI, Change","Q",1,"ab 304 €/Monat","","https://www.tomorrow.university/impact-master-of-arts-in-psychology"],
+ ["Euro-FH","F","Psychologie mit Schwerpunkt Klinische Psychologie","M.Sc.","B","Klinische Psychologie & Beratung","P",0,"k.A.","Portal","https://www.euro-fh.de/"],
+ ["Euro-FH","F","Psychologie mit Schwerpunkt AO- und Wirtschaftspsychologie","M.Sc.","C","AO- & Wirtschaftspsychologie","P",0,"k.A.","Portal","https://www.euro-fh.de/"],
+ ["Euro-FH","F","Psychologie mit Schwerpunkt Diagnostik und Evaluation","M.Sc.","H","Diagnostik & Evaluation","U",0,"k.A.","Portal","https://www.euro-fh.de/master-fernstudium/psychologie-schwerpunkt-diagnostik-evaluation/"],
+ ["Euro-FH","F","Psychologie mit Schwerpunkt Gesundheitspsychologie","M.Sc.","B","Gesundheit, Prävention, Reha","P",0,"ab 11.496 € (Portal)","Portal","https://www.euro-fh.de/master-fernstudium/psychologie-schwerpunkt-gesundheitspsychologie/"],
+ ["Euro-FH","F","Psychologie mit Schwerpunkt Pädagogische Psychologie","M.Sc.","H","Pädagogische Psychologie","U",0,"k.A.","Portal","https://www.euro-fh.de/"],
+ ["Euro-FH","F","Wirtschaftspsychologie","M.Sc.","C","2 aus 10 (u. a. Führung, UX, Mensch-Maschine-Interaktion)","Q",1,"ca. 11.800 € (Portal)","Portal","https://www.euro-fh.de/master-fernstudium/wirtschaftspsychologie/"],
+ ["Euro-FH","F","Beratungspsychologie und psychologische Therapieansätze","M.A.","F","Beratung, Therapieansätze","Q",0,"13.024 € (Portal)","Portal","https://www.euro-fh.de/master-fernstudium/beratungspsychologie/"],
+ // ---- Präsenz & hybrid
+ ["MSH Medical School Hamburg","P","Psychologie, Schwerpunkt Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"995 €/Monat","","https://www.medicalschool-hamburg.de/master/psychologie-mit-schwerpunkt-klinische-psychologie-und-psychotherapie-nach-psychthg-2019/"],
+ ["MSH Medical School Hamburg","P","Psychologie mit Schwerpunkt Rechtspsychologie","M.Sc.","E","Rechtspsychologie","P",0,"795 €/Monat","","https://www.medicalschool-hamburg.de/master/psychologie-mit-schwerpunkt-rechtspsychologie/"],
+ ["MSH Medical School Hamburg","P","Arbeits- und Organisationspsychologie","M.Sc.","C","BGM, Kompetenzfelder","Q",0,"795 €/Monat","","https://www.medicalschool-hamburg.de/master/arbeits-und-organisationspsychologie/"],
+ ["MSB Medical School Berlin","P","Psychologie, Schwerpunkt Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"995 €/Monat","","https://www.medicalschool-berlin.de/master/psychologie-mit-schwerpunkt-klinische-psychologie-und-psychotherapie-master-psychotherapie/"],
+ ["MSB Medical School Berlin","P","Psychologie","M.Sc.","D","Sexualpsychologie; Neuro- und Rehapsychologie","P",0,"795 €/Monat","","https://www.medicalschool-berlin.de/master/psychologie/"],
+ ["MSB Medical School Berlin","P","Psychologie mit Schwerpunkt Rechtspsychologie","M.Sc.","E","Rechtspsychologie","P",0,"795 €/Monat","","https://www.medicalschool-berlin.de/master/psychologie-mit-schwerpunkt-rechtspsychologie/"],
+ ["MSB Medical School Berlin","P","Arbeits- und Organisationspsychologie","M.Sc.","C","HR, Coaching & Consulting, Occupational Health","Q",0,"795 €/Monat","","https://www.medicalschool-berlin.de/master/arbeits-und-organisationspsychologie/"],
+ ["MSB Medical School Berlin","P","Cognitive Neuroscience","M.Sc.","H","Methoden, Neurostimulation (englisch)","Q",0,"795 €/Monat","","https://www.medicalschool-berlin.de/master/cognitive-neuroscience/"],
+ ["HMU Potsdam","P","Psychotherapie (approbationskonform)","M.Sc.","A","nach PsychThG; auch Düsseldorf/Krefeld","P",0,"995 €/Monat","","https://www.health-and-medical-university.de/master/psychotherapie/"],
+ ["HMU Erfurt","P","Psychotherapie (approbationskonform)","M.Sc.","A","nach PsychThG","P",0,"995 €/Monat","","https://www.health-and-medical-university-erfurt.de/master/psychotherapie/"],
+ ["Psychologische Hochschule Berlin","P","Psychologie: Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"978 €/Monat","","https://psychologische-hochschule.de/studium-ausbildung/studiengaenge/msc-klinische-psychologie-und-psychotherapie/"],
+ ["Psychologische Hochschule Berlin","P","Psychologie: Rechtspsychologie","M.Sc.","E","Begutachtung, Kriminaltherapie","P",0,"934 €/Monat","","https://psychologische-hochschule.de/studium-ausbildung/studiengaenge/msc-psychologie-rechtspsychologie/"],
+ ["Psychologische Hochschule Berlin","P","Rechtspsychologie: Begutachtung und Intervention (weiterbildend)","M.Sc.","E","berufsbegleitend, setzt Psychologie-Master voraus","P",0,"556 €/Monat","","https://psychologische-hochschule.de/studium-ausbildung/studiengaenge/msc-rechtspsychologie-begutachtung-und-intervention/"],
+ ["IPU Berlin","P","Psychologie: Klinische Psychologie und Psychotherapie","M.A.","A","psychodynamisch; VZ und TZ","P",0,"22.700 € (VZ, Vorauszahlung)","","https://www.ipu-berlin.de/studium/ma-psychologie-klinische-psychologie-und-psychotherapie"],
+ ["IPU Berlin","P","Psychology – Clinical Psychology Focus","M.A.","B","englisch, psychodynamisch","Q",0,"24.800 € (Vorauszahlung)","","https://www.ipu-berlin.de/studium/ma-psychology-english-track"],
+ ["IPU Berlin","P","Psychology focusing on Organisation","M.A.","C","A&O-, Sozial-, Umweltpsychologie (englisch)","Q",0,"24.800 € (Vorauszahlung)","","https://www.ipu-berlin.de/studium/ma-psychology-focusing-on-organisation-transformation-processes-in-work-society-and-environment"],
+ ["IPU Berlin","P","Psychoanalytische Kulturwissenschaft und Kulturpsychologie","M.A.","H","Kulturpsychologie","Q",0,"15.300 € (Vorauszahlung)","","https://www.ipu-berlin.de/studium/ma-psychoanalytische-kulturwissenschaft-und-kulturpsychologie"],
+ ["Universität Witten/Herdecke","P","Psychologie, Schwerpunkt Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"25.968 €","","https://www.uni-wh.de/studium/studienangebot/master-studiengaenge/psychologie-master"],
+ ["Charlotte Fresenius Hochschule","P","Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"k.A.","","https://www.charlotte-fresenius-uni.de/studium/klinische-psychologie-psychotherapie-master/"],
+ ["Charlotte Fresenius Hochschule","P","Psychologie mit Schwerpunkt Rechtspsychologie","M.Sc.","E","Schuldfähigkeit, Prognose","P",0,"k.A.","","https://www.charlotte-fresenius-uni.de/studium/rechtspsychologie-master/"],
+ ["Hochschule Fresenius","P","Psychologie","M.Sc.","D","Klinische Felder, A&O, Intervention & Reha, Coaching","P",0,"695–850 €/Monat","","https://www.hs-fresenius.de/master/psychologie/"],
+ ["Hochschule Fresenius","P","Wirtschaftspsychologie","M.Sc.","C","Personal, Konsumentenpsychologie, A&O mit Digitalisierung","Q",1,"850 €/Monat","","https://www.hs-fresenius.de/master/wirtschaftspsychologie/"],
+ ["Hochschule Fresenius","P","Rechtspsychologie","M.Sc.","E","Diagnostik, Gutachten","P",0,"850 €/Monat","","https://www.hs-fresenius.de/master/rechtspsychologie/"],
+ ["SRH University","P","Psychologie (mit Schwerpunkten)","M.Sc.","D","Gesundheit, Neuro, Notfall, Recht, Reha, Sport, Wirtschaft","U",0,"590–790 €/Monat","","https://www.srh-university.de/de/master/master-psychologie/p/"],
+ ["SRH University","P","Arbeits- und Organisationspsychologie","M.Sc.","C","Sicherheit & Gesundheit, Fachkraft Arbeitssicherheit","Q",0,"590 €/Monat","","https://www.srh-university.de/de/master/arbeits-und-organisationspsychologie/p/"],
+ ["SRH University","P","Sexualpsychologie","M.Sc.","H","Sexualpsychologie","Q",0,"490–690 €/Monat","","https://www.srh-university.de/de/master/sexualpsychologie/p/"],
+ ["SRH University","P","Cognitive Neuroscience","M.Sc.","H","EEG, fNIRS, Eye-Tracking (englisch)","Q",0,"790 €/Monat","Akkreditierung","https://www.srh-university.de/de/master/cognitive-neuroscience/p/"],
+ ["PFH Göttingen","P","Klinische Psychologie und Psychotherapie","M.Sc.","A","KVT, psychodynamisch, systemisch, KJP","P",0,"1.095 €/Monat","Akkreditierung","https://www.pfh.de/studium/master/klinische-psychologie-und-psychotherapie"],
+ ["PFH Göttingen","P","Psychologie","M.Sc.","D","Digitale Psychologie & Interventionen; Personal & Coaching","P",1,"840 €/Monat","","https://www.pfh.de/studium/master/psychologie"],
+ ["PFH Göttingen","P","Wirtschaftspsychologie","M.Sc.","C","Personal oder Digitales Marketing","P",1,"830 €/Monat","","https://www.pfh.de/studium/master/wirtschaftspsychologie"],
+ ["HSD Hochschule Döpfer","P","Psychologie / Psychology","M.Sc.","D","Sozial-/Persönlichkeitspsychologie","P",0,"699 €/Monat","","https://www.hs-doepfer.de/studium/msc-psychologie"],
+ ["FOM Hochschule","P","Wirtschaftspsychologie","M.Sc.","C","berufsbegleitend, Campus oder live-online","Q",0,"14.390 €","","https://www.fom.de/de/hochschulbereiche/wirtschaft-und-psychologie/wirtschaftspsychologie-ma.html"],
+ ["FOM Hochschule","P","Arbeits-, Organisations- und Personalpsychologie","M.Sc.","C","berufsbegleitend, Campus oder live-online","P",0,"14.390 €","","https://www.fom.de/de/hochschulbereiche/wirtschaft-und-psychologie/arbeits-organisations-personalpsychologie-ma.html"],
+ ["FHM Fachhochschule des Mittelstands","P","Psychologie","M.Sc.","D","Klinische Psychologie; A&O","Q",0,"15.380 €","","https://www.fh-mittelstand.de/studiengang/msc-psychologie/vollzeit/"],
+ ["FHM Fachhochschule des Mittelstands","P","Personal- und Kommunikationspsychologie","M.Sc.","C","live-online, berufsbegleitend","Q",0,"14.780 €","","https://www.fh-mittelstand.de/studiengang/kommunikationspsychologie/berufsbegleitendes-studium/"],
+ ["DHGS","P","Psychologie","M.Sc.","D","Klinische, Positive, Sportpsychologie u. a.","P",0,"645 €/Monat","","https://www.dhgs-hochschule.de/studienangebot/master/gesundheit/psychologie/"],
+ ["DHGS","P","Sportpsychologie","M.Sc.","G","Coaching, Leistungspsychologie","Q",0,"645 €/Monat","","https://www.dhgs-hochschule.de/studienangebot/master/sport/sportpsychologie/"],
+ ["DHGS","P","Positive Psychologie und Coaching","M.A.","F","Positive Coaching oder Positive Business","Q",0,"675 €/Monat","","https://www.dhgs-hochschule.de/studienangebot/master/gesundheit/positive-psychologie-coaching/"],
+ ["BSP Business & Law School","P","Medienpsychologie","M.Sc.","H","morphologisch, qualitative Methoden","Q",0,"690 €/Monat","","https://www.businessschool-berlin.de/master/medienpsychologie/"],
+ ["BSP Business & Law School","P","Wirtschaftspsychologie (Personal- und Organisationsentwicklung)","M.Sc.","C","Personal- & Organisationsentwicklung","Q",0,"690 €/Monat","","https://www.businessschool-berlin.de/master/wirtschaftspsychologie/"],
+ ["BSP Business & Law School","P","Sportpsychologie","M.Sc.","G","Psychologie, Wirtschaft, Beratung","Q",0,"690 €/Monat","","https://www.businessschool-berlin.de/master/sportpsychologie/"],
+ ["MU Media University","P","Wirtschaftspsychologie / Business Psychology","M.Sc.","C","Personal, Marktforschung, UX, Entrepreneurship","Q",1,"890 €/Monat","","https://www.media-university.de/studium/master-studium/wirtschaftspsychologie/"],
+ ["Macromedia University","P","Business Management – Studienrichtung Wirtschaftspsychologie","M.A.","C","HR, Werbepsychologie, Verbraucherforschung","Q",0,"ab 899 €/Monat","","https://www.macromedia-fachhochschule.de/de/master/wirtschaftspsychologie/"],
+ ["Macromedia University","P","Psychologische Beratung","M.A.","F","Beratung, Familie, Business Coaching","Q",0,"ab 849 €/Monat","Akkreditierung","https://www.macromedia-fachhochschule.de/de/master/psychologische-beratung/"],
+ ["CBS University","P","Wirtschaftspsychologie","M.Sc.","C","Marketing & Sales, Organisation, Diagnostik/Coaching","Q",0,"6.210 €/Semester","","https://www.cbs.de/master/wirtschaftspsychologie"],
+ ["CBS University","P","Business Psychology and Management","M.Sc.","C","Organisation, Nachhaltigkeit, Coaching (englisch)","Q",0,"6.210 €/Semester","","https://www.cbs.de/master/business-psychology"],
+ ["CBS University","P","Sales Management und Vertriebspsychologie","M.Sc.","C","berufsbegleitend, digital + Präsenz","Q",0,"2.970 €/Semester","","https://www.cbs.de/master/sales-management-vertriebspsychologie-studium"],
+ ["University of Europe (UE)","P","Klinische Psychologie, Schwerpunkt Reha- und Gerontopsychologie","M.Sc.","B","Reha, Geronto","U",0,"ab 628 €/Monat","","https://www.ue-germany.com/de/studiengaenge/master/psychology-clinic-and-rehabilitation"],
+ ["University of Europe (UE)","P","Psychologie: Coaching & Beratung","M.Sc.","F","Coaching und Beratung","U",0,"ab 628 €/Monat","","https://www.ue-germany.com/de/studiengaenge/master/psychologie-coaching-und-beratung"],
+ ["Rheinische Hochschule Köln","P","Wirtschaftspsychologie","M.Sc.","C","Organisationen oder Marktumfeld","P",0,"599–649 €/Monat","","https://rh-koeln.de/studium/master-wirtschaftspsychologie"],
+ ["Rheinische Hochschule Köln","P","Angewandte Psychologie, Coaching & Consulting","M.Sc.","F","Coaching, Change, Diagnostik","Q",0,"599–649 €/Monat","Akkreditierung","https://rh-koeln.de/studium/master-angewandte-psychologie-coaching-consulting"],
+ ["HdWM Mannheim","P","Wirtschaftspsychologie – Organisationspsychologie","M.Sc.","C","Organisationspsychologie","P",0,"650 €/Monat + 650 €","","https://www.hdwm.de/en/master/m-sc-wirtschaftspsychologie-organisationspsychologie"],
+ ["Hochschule für angewandtes Management","P","Wirtschaftspsychologie","M.A.","C","Digital Transformation, Leadership, Marketing, Coaching","Q",1,"595 €/Monat","","https://www.fham.de/studiengaenge/master/wirtschaftspsychologie/"],
+ ["Hochschule für angewandtes Management","P","Psychologie der Lebenswelten","M.Sc.","D","11 Spezialisierungen (u. a. Mental Health, Kriminalpsychologie)","Q",0,"595 €/Monat","","https://www.fham.de/studiengaenge/master/psychologie-der-lebenswelten/"],
+ ["NORDAKADEMIE","P","HR-Management & Wirtschaftspsychologie","M.Sc.","C","berufsbegleitend, Blended","Q",0,"k.A.","","https://www.nordakademie.de/studium/master-berufsbegleitend/hr-management-wirtschaftspsychologie/"],
+ ["Zeppelin Universität","P","Psychology & Management","M.A.","C","Organisationspsychologie, Digital Leadership, datenbasiertes HR","Q",1,"7.300 €/Semester","Akkreditierung","https://www.zeppelin-university.com/studying-lifelong-learning/master/psychology-management/"],
+ ["Medizinische Hochschule Brandenburg","P","Klinische Psychologie und Psychotherapie","M.Sc.","A","nach PsychThG","P",0,"19.920 €","","https://www.mhb-fontane.de/de/master-klinische-psychologie-psychotherapie"]
+];
+const K={A:0,B:1,C:2,D:3,E:4,F:5,G:6,H:7};
+const ZUG={P:"Psychologie-Bachelor bzw. -Vorkenntnisse",Q:"Quereinstieg möglich",U:"unklar"};
+const STAT={"geplant":"Start 2027 geplant","Akkreditierung":"in Akkreditierung","Portal":"nur Portaldaten"};
+const TYP={P:"Präsenz & hybrid",F:"Fernstudium"};
+const rows=R.map(r=>({hs:r[0],typ:r[1],name:r[2],abs:r[3],ausr:AUSR[K[r[4]]],ai:K[r[4]],sp:r[5],zug:r[6],ki:!!r[7],kosten:r[8],status:r[9],url:r[10]}));
+function sizeClass(n){if(n==null)return"k.A.";return n<2000?"klein":n<=10000?"mittel":"groß"}
+const fmt=n=>n==null?"k.A.":n.toLocaleString("de-DE");
+
+// ---- State ------------------------------------------------------------------
+const st={typ:"all",size:"all",sure:false,q:"",sort:{k:"hs",dir:1}};
+try{const s=JSON.parse(localStorage.getItem("psymaster-f")||"{}");Object.assign(st,{typ:s.typ||"all",size:s.size||"all",sure:!!s.sure})}catch(e){}
+function save(){try{localStorage.setItem("psymaster-f",JSON.stringify({typ:st.typ,size:st.size,sure:st.sure}))}catch(e){}}
+function filtered(ignoreTyp){
+  return rows.filter(r=>(ignoreTyp||st.typ==="all"||r.typ===st.typ)
+    &&(st.size==="all"||sizeClass(HS[r.hs][0])===st.size)
+    &&(!st.sure||!r.status));
+}
+
+// ---- Tooltip ----------------------------------------------------------------
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8);const y=Math.min(e.clientY+14,innerHeight-tip.offsetHeight-8);tip.style.left=x+"px";tip.style.top=y+"px"}
+document.addEventListener("pointermove",e=>{const t=e.target.closest("[data-tip]");if(t)showTip(e,t.dataset.tip);else tip.hidden=true});
+
+// ---- Rendering --------------------------------------------------------------
+function legend(el){
+  const ts=st.typ==="all"?["P","F"]:[st.typ];
+  el.innerHTML=ts.map(t=>`<span><i class="sw" style="background:var(${t==="P"?"--praesenz":"--fern"})"></i>${TYP[t]}</span>`).join("");
+}
+function barChart(el,cats,getCat,list){
+  const ts=st.typ==="all"?["P","F"]:[st.typ];
+  const data=cats.map((c,i)=>{const o={c,tot:0};ts.forEach(t=>{o[t]=list.filter(r=>r.typ===t&&getCat(r)===i).length;o.tot+=o[t]});return o});
+  const max=Math.max(1,...data.map(d=>d.tot));
+  const sorted=data.slice().sort((a,b)=>b.tot-a.tot);
+  if(!list.length){el.innerHTML='<div class="empty">Keine Studiengänge im aktuellen Filter.</div>';return}
+  el.innerHTML=sorted.map(d=>{
+    const segs=ts.filter(t=>d[t]>0).map(t=>`<div class="seg-bar" style="width:${d[t]/max*100}%;background:var(${t==="P"?"--praesenz":"--fern"})" data-tip="${d.c}<br>${TYP[t]}: <b>${d[t]}</b> Studiengänge"></div>`).join("");
+    return `<div class="brow"><span class="lab">${d.c}</span><div class="track">${segs}</div><span class="n">${d.tot}</span></div>`;
+  }).join("");
+}
+function kpis(list){
+  const pct=n=>list.length?Math.round(n/list.length*100)+" %":"–";
+  document.getElementById("k1").textContent=list.length;
+  document.getElementById("k2").textContent=new Set(list.map(r=>r.hs)).size;
+  document.getElementById("k3").textContent=pct(list.filter(r=>r.zug==="Q").length);
+  document.getElementById("k4").textContent=pct(list.filter(r=>r.ki).length);
+}
+function sizeList(list){
+  const el=document.getElementById("c-size");
+  const names=[...new Set(list.map(r=>r.hs))];
+  if(!names.length){el.innerHTML='<div class="empty">Keine Hochschulen im aktuellen Filter.</div>';return}
+  const lmax=Math.log10(130000),lmin=Math.log10(150);
+  names.sort((a,b)=>(HS[b][0]||0)-(HS[a][0]||0));
+  el.innerHTML=names.map(n=>{
+    const [s,src]=HS[n];const progs=list.filter(r=>r.hs===n);
+    const types=[...new Set(progs.map(r=>r.typ))];
+    const w=s?((Math.log10(s)-lmin)/(lmax-lmin)*100):0;
+    const col=types.length>1?"linear-gradient(90deg,var(--praesenz) 50%,var(--fern) 50%)":`var(${types[0]==="P"?"--praesenz":"--fern"})`;
+    const tags=types.map(t=>`<span class="tag t-${t.toLowerCase()}">${t==="P"?"Präsenz":"Fern"}</span>`).join(" ");
+    return `<div class="srow"><span class="nm">${n} ${tags}</span><div class="strack" data-tip="${n}<br>${fmt(s)} Studierende · ${sizeClass(s)}<br>Quelle: ${src}">${s?`<div class="sfill" style="width:${w}%;background:${col}"></div>`:""}</div><span class="st">${fmt(s)}</span><span class="pc">${progs.length}</span></div>`;
+  }).join("");
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function table(list){
+  const q=st.q.toLowerCase();
+  let l=list.filter(r=>!q||[r.hs,r.name,r.sp,r.ausr].join(" ").toLowerCase().includes(q));
+  const k=st.sort.k,d=st.sort.dir;
+  l.sort((a,b)=>String(a[k]).localeCompare(String(b[k]),"de")*d||a.hs.localeCompare(b.hs,"de"));
+  document.getElementById("tcount").textContent=`${l.length} von ${list.length} Studiengängen im Filter`;
+  document.getElementById("tb").innerHTML=l.map(r=>`<tr>
+    <td>${esc(r.hs)}<div style="color:var(--ink-3);font-size:12px">${fmt(HS[r.hs][0])} Stud. · ${sizeClass(HS[r.hs][0])}</div></td>
+    <td><span class="tag t-${r.typ.toLowerCase()}">${r.typ==="P"?"Präsenz":"Fern"}</span></td>
+    <td><b style="font-weight:600">${esc(r.name)}</b> <span style="color:var(--ink-3)">${r.abs}</span></td>
+    <td>${esc(r.ausr)}${r.ki?' <span class="tag">Digital/KI</span>':""}</td>
+    <td style="color:var(--ink-2)">${esc(r.sp)}</td>
+    <td>${ZUG[r.zug]}</td>
+    <td class="num">${esc(r.kosten)}</td>
+    <td>${r.status?`<span class="tag warn">${STAT[r.status]}</span>`:'<span class="tag">gesichert</span>'}</td>
+    <td><a href="${r.url}" target="_blank" rel="noopener">Seite</a></td></tr>`).join("");
+}
+function render(){
+  document.querySelectorAll("#f-typ button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===st.typ));
+  document.querySelectorAll("#f-size button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===st.size));
+  document.getElementById("f-sure").checked=st.sure;
+  const list=filtered();
+  kpis(list);
+  legend(document.getElementById("leg1"));legend(document.getElementById("leg2"));
+  barChart(document.getElementById("c-ausr"),AUSR,r=>r.ai,list);
+  barChart(document.getElementById("c-zug"),Object.values(ZUG),r=>"PQU".indexOf(r.zug),list);
+  barChart(document.getElementById("c-app"),["approbationsrelevant","nicht approbationsrelevant"],r=>r.ai===0?0:1,list);
+  sizeList(list);table(list);save();
+}
+document.getElementById("f-typ").addEventListener("click",e=>{const b=e.target.closest("button");if(b){st.typ=b.dataset.v;render()}});
+document.getElementById("f-size").addEventListener("click",e=>{const b=e.target.closest("button");if(b){st.size=b.dataset.v;render()}});
+document.getElementById("f-sure").addEventListener("change",e=>{st.sure=e.target.checked;render()});
+document.getElementById("q").addEventListener("input",e=>{st.q=e.target.value;table(filtered())});
+document.querySelectorAll("th button").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.k;st.sort.dir=st.sort.k===k?-st.sort.dir:1;st.sort.k=k;table(filtered())}));
+render();
+</script>
+</body>
+</html>
